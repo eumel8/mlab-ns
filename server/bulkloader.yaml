@@ -115,6 +115,19 @@ transformers:
       external_name: url
 
 
+- kind: RedirectProbability
+  connector: csv
+  connector_options:
+      encoding: utf-8
+  property_map:
+    - property: __key__
+      external_name: name
+      export_transform: transform.key_id_or_name_as_string
+
+    - property: probability
+      import_transform: transform.none_if_empty(float)
+
+
 - kind: Site
   connector: csv
   connector_options:

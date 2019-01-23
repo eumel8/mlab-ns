@@ -17,8 +17,9 @@ app = webapp.WSGIApplication(
     (r'/reload_maxminddb', update.ReloadMaxmindDb),
     (r'/privacy', privacy.PrivacyHandler),
     (r'/docs', docs.DocsHandler),
-    # (r'/cron/process_logs', log2bq.Log2BigQueryHandler),
-    (r'/.*', lookup.LookupHandler)],
+    (r'/_ah/warmup', lookup.WarmupHandler),
+    (r'/.*', lookup.LookupHandler),
+    ],
     debug=True )
 
 def main():
