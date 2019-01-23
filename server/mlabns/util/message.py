@@ -19,6 +19,7 @@ DEFAULT_RESPONSE_FORMAT = FORMAT_JSON
 HEADER_CITY = 'X-AppEngine-City'
 HEADER_COUNTRY = 'X-AppEngine-Country'
 HEADER_LAT_LONG = 'X-AppEngine-CityLatLong'
+HEADER_CLIENT_PROTO = 'X-Forwarded-Proto'
 LATITUDE = 'lat'
 LONGITUDE = 'lon'
 METRO = 'metro'
