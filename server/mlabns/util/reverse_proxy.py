@@ -16,29 +16,29 @@ default_reverse_proxy = model.ReverseProxyProbability(
 
 def get_reverse_proxy(experiment):
     """Reads and caches the ReverseProxyProbability record for an experiment"""
-    reverse_proxy = memcache.get(
+    prob = memcache.get(
         experiment,
         namespace=constants.MEMCACHE_NAMESPACE_REVERSE_PROXY)
-    if reverse_proxy is None:
-        logging.info("Getting reverse proxy probability for experiment" +
-                     experiment)
-        reverse_proxy = model.ReverseProxyProbability.get_by_key_name(
+    if prob is None:
+        prob = model.ReverseProxyProbability.get_by_key_name(
             experiment)
 
-        if reverse_proxy is None:
+        if prob is None:
             logging.info('No reverse proxy probability found; using default')
             return default_reverse_proxy
 
+        logging.info("%s", prob)
+
         if not memcache.set(
                 experiment,
-                reverse_proxy,
+                prob,
                 time=1800,
                 namespace=constants.MEMCACHE_NAMESPACE_REVERSE_PROXY):
 
             logging.error(
                 'Failed to update ReverseProxyProbability in memcache')
 
-    return reverse_proxy
+    return prob
 
 
 def during_business_hours(t):

@@ -1,7 +1,9 @@
+import mock
 import unittest2
 
 from mlabns.db import model
 from mlabns.util import reverse_proxy
+from mock import MagicMock
 
 from google.appengine.ext import testbed
 
@@ -22,15 +24,15 @@ class ReverseProxyTest(unittest2.TestCase):
     def tearDown(self):
         self.testbed.deactivate()
 
-    # @mock.patch.object(model, 'ReverseProxyProbability')
-    # def test_get_reverse_proxy_returns_mock_value(self, mock_reverse_proxy):
-    #     mock_reverse_proxy.return_value.get_by_key_name.return_value = self.fake_reverse_proxy
-    #     actual = reverse_proxy.get_reverse_proxy('default')
+    @mock.patch.object(model, 'ReverseProxyProbability')
+    def test_get_reverse_proxy_returns_mock_value(self, mock_reverse_proxy):
+        mock_reverse_proxy.return_value.get_by_key_name = MagicMock(return_value=self.fake_reverse_proxy)
+        actual = reverse_proxy.get_reverse_proxy('default')
 
-    #     self.assertEqual(actual.name, self.fake_reverse_proxy.name)
-    #     self.assertEqual(actual.probability,
-    #                      self.fake_reverse_proxy.probability)
-    #     self.assertEqual(actual.url, self.fake_reverse_proxy.url)
+        self.assertEqual(actual.name, self.fake_reverse_proxy.name)
+        self.assertEqual(actual.probability,
+                         self.fake_reverse_proxy.probability)
+        self.assertEqual(actual.url, self.fake_reverse_proxy.url)
 
     # @mock.patch.object(model, 'ReverseProxyProbability')
     # def test_get_reverse_proxy_returns_default_value(self, mock_reverse_proxy):

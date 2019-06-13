@@ -1,0 +1,90 @@
+diff --git a/server/mlabns/tests/test_reverse_proxy.py b/server/mlabns/tests/test_reverse_proxy.py
+index 3a75e50..a1b5400 100644
+--- a/server/mlabns/tests/test_reverse_proxy.py
++++ b/server/mlabns/tests/test_reverse_proxy.py
+@@ -29,10 +29,8 @@ class ReverseProxyTest(unittest2.TestCase):
+ 
+     @mock.patch.object(model, 'ReverseProxyProbability')
+     def test_get_reverse_proxy_returns_mock_value(self, mock_reverse_proxy):
+-        mock_reverse_proxy.return_value.all.return_value.run.return_value = (
+-            [self.fake_reverse_proxy])
+-
+-        actual = reverse_proxy.get_reverse_proxy()
++        mock_reverse_proxy.return_value.get_by_key_name.return_value = self.fake_reverse_proxy
++        actual = reverse_proxy.get_reverse_proxy('default')
+ 
+         self.assertEqual(actual.name, self.fake_reverse_proxy.name)
+         self.assertEqual(actual.probability,
+@@ -41,9 +39,8 @@ class ReverseProxyTest(unittest2.TestCase):
+ 
+     @mock.patch.object(model, 'ReverseProxyProbability')
+     def test_get_reverse_proxy_returns_default_value(self, mock_reverse_proxy):
+-        mock_reverse_proxy.return_value.all.return_value.run.return_value = []
+-
+-        actual = reverse_proxy.get_reverse_proxy()
++        mock_reverse_proxy.return_value.get_by_key_name.return_value = None
++        actual = reverse_proxy.get_reverse_proxy('default')
+ 
+         self.assertEqual(actual, reverse_proxy.default_reverse_proxy)
+         self.assertEqual(actual.name, reverse_proxy.default_reverse_proxy.name)
+diff --git a/server/mlabns/util/reverse_proxy.py b/server/mlabns/util/reverse_proxy.py
+index 9fc9771..9237ba6 100644
+--- a/server/mlabns/util/reverse_proxy.py
++++ b/server/mlabns/util/reverse_proxy.py
+@@ -14,23 +14,28 @@ default_reverse_proxy = model.ReverseProxyProbability(
+     url="https://mlab-ns.appspot.com")
+ 
+ 
+-def get_reverse_proxy():
+-    """Reads and caches the first (and only) ReverseProxyProbability record."""
++def get_reverse_proxy(experiment):
++    """Reads and caches the ReverseProxyProbability record for a given experiment.
++    If the experiment does not exist, it returns a default probability."""
+     reverse_proxy = memcache.get(
+-        'default',
++        experiment,
+         namespace=constants.MEMCACHE_NAMESPACE_REVERSE_PROXY)
+     if reverse_proxy is None:
+-        for prob in model.ReverseProxyProbability.all().run():
+-            if not memcache.set(
+-                    'default',
+-                    prob,
+-                    time=1800,
+-                    namespace=constants.MEMCACHE_NAMESPACE_REVERSE_PROXY):
+-                logging.error(
+-                    'Failed to update ReverseProxyProbability in memcache')
+-            return prob
+-        logging.info('No reverse proxy probability found; using default')
+-        reverse_proxy = default_reverse_proxy
++        reverse_proxy = model.ReverseProxyProbability.get_by_key_name(experiment)
++
++        if reverse_proxy is None:
++            logging.info('No reverse proxy probability found; using default')
++            return default_reverse_proxy
++
++        if not memcache.set(
++            experiment,
++            reverse_proxy,
++            time=1800,
++            namespace=constants.MEMCACHE_NAMESPACE_REVERSE_PROXY):
++
++            logging.error(
++                'Failed to update ReverseProxyProbability in memcache')
++
+     return reverse_proxy
+ 
+ 
+@@ -62,9 +67,11 @@ def try_reverse_proxy_url(request, t):
+     Returns:
+        str, empty string for no action, or complete URL to reverse proxy.
+     """
+-    if request.path != '/ndt_ssl':
++    if request.path != '/ndt_ssl' and request.path != '/ndt7':
+         return ""
+-    rdp = get_reverse_proxy()
++
++    experiment = request.path.strip('/')
++    rdp = get_reverse_proxy(experiment)
+     if random.uniform(0, 1) > rdp.probability:
+         return ""
+     if not during_business_hours(t):
