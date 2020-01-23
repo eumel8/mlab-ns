@@ -1,7 +1,7 @@
 import mock
-import StringIO
+import io
 import unittest2
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from google.appengine.api import app_identity
 from google.appengine.ext import db
@@ -46,7 +46,7 @@ class SiteRegistrationHandlerTest(unittest2.TestCase):
     @mock.patch.object(update.IPUpdateHandler, 'update')
     def testGetIgnoresTestSites(self, mock_update):
         """Test sites should not be processed in the sites update."""
-        urllib2.urlopen.return_value = StringIO.StringIO("""[
+        urllib.request.urlopen.return_value = io.StringIO("""[
 {
     "site": "xyz0t",
     "metro": ["xyz0t", "xyz"],
@@ -72,7 +72,7 @@ class SiteRegistrationHandlerTest(unittest2.TestCase):
     @mock.patch.object(update.IPUpdateHandler, 'update')
     def testUpdateExistingSites(self, mock_update):
         """Test updating an existing site."""
-        urllib2.urlopen.return_value = StringIO.StringIO("""[
+        urllib.request.urlopen.return_value = io.StringIO("""[
 {
     "site": "xyz01",
     "metro": ["xyz01", "xyz"],
@@ -124,7 +124,7 @@ class IPUpdateHandlerTest(unittest2.TestCase):
     @mock.patch.object(update.IPUpdateHandler, 'put_sliver_tool')
     def test_update(self, mock_put_sliver_tool, mock_urlopen):
         app_identity.get_application_id.return_value = 'mlab-testing'
-        mock_urlopen.return_value = StringIO.StringIO("""[
+        mock_urlopen.return_value = io.StringIO("""[
 {
     "hostname": "ndt.iupui.mlab1.xyz01.measurement-lab.org",
     "ipv4": "192.168.0.1",

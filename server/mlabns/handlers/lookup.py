@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 import time
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from mlabns.db import model
 from mlabns.util import constants
@@ -252,7 +252,7 @@ class LookupHandler(webapp.RequestHandler):
           url: str, proxy URL content to client.
         """
         try:
-            resp = urllib2.urlopen(url)
+            resp = urllib.request.urlopen(url)
             body = resp.read()
             self.response.headers['Cache-Control'] = 'no-cache'
             self.response.headers['Access-Control-Allow-Origin'] = '*'
@@ -261,7 +261,7 @@ class LookupHandler(webapp.RequestHandler):
                 resp.info().getheader('Content-Type'))
             self.response.out.write(body)
             return True
-        except urllib2.URLError:
+        except urllib.error.URLError:
             logging.exception('[reverse_proxy],failure,%s', url)
             return False
 

@@ -24,8 +24,8 @@ import copy
 import httplib2
 import logging
 import oauth2 as oauth
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 
 from oauth2client.anyjson import simplejson
 from oauth2client.client import Credentials
@@ -33,7 +33,7 @@ from oauth2client.client import Flow
 from oauth2client.client import Storage
 
 try:
-  from urlparse import parse_qsl
+  from urllib.parse import parse_qsl
 except ImportError:
   from cgi import parse_qsl
 
@@ -74,12 +74,12 @@ def _oauth_uri(name, discovery, params):
   """
   if name not in ['request', 'access', 'authorize']:
     raise KeyError(name)
-  keys = discovery[name]['parameters'].keys()
+  keys = list(discovery[name]['parameters'].keys())
   query = {}
   for key in keys:
     if key in params:
       query[key] = params[key]
-  return discovery[name]['url'] + '?' + urllib.urlencode(query)
+  return discovery[name]['url'] + '?' + urllib.parse.urlencode(query)
 
 
 
@@ -303,11 +303,11 @@ class TwoLeggedOAuthCredentials(Credentials):
         if self._requestor is None:
           raise MissingParameter(
               'Requestor must be set before using TwoLeggedOAuthCredentials')
-        parsed = list(urlparse.urlparse(uri))
+        parsed = list(urllib.parse.urlparse(uri))
         q = parse_qsl(parsed[4])
         q.append(('xoauth_requestor_id', self._requestor))
-        parsed[4] = urllib.urlencode(q)
-        uri = urlparse.urlunparse(parsed)
+        parsed[4] = urllib.parse.urlencode(q)
+        uri = urllib.parse.urlunparse(parsed)
 
         req = oauth.Request.from_consumer_and_token(
             self.consumer, None, http_method=method, http_url=uri)
@@ -359,11 +359,11 @@ class FlowThreeLegged(Flow):
     self.params = kwargs
     self.request_token = {}
     required = {}
-    for uriinfo in discovery.itervalues():
-      for name, value in uriinfo['parameters'].iteritems():
+    for uriinfo in discovery.values():
+      for name, value in uriinfo['parameters'].items():
         if value['required'] and not name.startswith('oauth_'):
           required[name] = 1
-    for key in required.iterkeys():
+    for key in required.keys():
       if key not in self.params:
         raise MissingParameter('Required parameter %s not supplied' % key)
 
@@ -386,7 +386,7 @@ class FlowThreeLegged(Flow):
         'user-agent': self.user_agent,
         'content-type': 'application/x-www-form-urlencoded'
     }
-    body = urllib.urlencode({'oauth_callback': oauth_callback})
+    body = urllib.parse.urlencode({'oauth_callback': oauth_callback})
     uri = _oauth_uri('request', self.discovery, self.params)
 
     resp, content = client.request(uri, 'POST', headers=headers,
@@ -414,7 +414,7 @@ class FlowThreeLegged(Flow):
        The Credentials object.
     """
 
-    if not (isinstance(verifier, str) or isinstance(verifier, unicode)):
+    if not (isinstance(verifier, str) or isinstance(verifier, str)):
       verifier = verifier['oauth_verifier']
 
     token = oauth.Token(

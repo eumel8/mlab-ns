@@ -83,7 +83,7 @@ def _normalize_key(value):
     return None
   if getattr(value, "key", None):
     return value.key()
-  elif isinstance(value, basestring):
+  elif isinstance(value, str):
     return datastore.Key(value)
   else:
     return value
@@ -329,7 +329,7 @@ class Context(object):
 
   def flush(self):
     """Flush all information recorded in context."""
-    for pool in self._pools.values():
+    for pool in list(self._pools.values()):
       pool.flush()
 
   # TODO(user): Add convenience method for mapper params.

@@ -16,7 +16,7 @@
 
 """Pipelines for mapreduce library."""
 
-from __future__ import with_statement
+
 
 
 

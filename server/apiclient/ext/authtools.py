@@ -23,7 +23,7 @@ other example apps in the same directory.
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'
 __all__ = ["run"]
 
-import BaseHTTPServer
+import http.server
 import gflags
 import logging
 import socket
@@ -33,7 +33,7 @@ from optparse import OptionParser
 from apiclient.oauth import RequestError
 
 try:
-    from urlparse import parse_qsl
+    from urllib.parse import parse_qsl
 except ImportError:
     from cgi import parse_qsl
 
@@ -53,7 +53,7 @@ gflags.DEFINE_multi_int('auth_host_port', [8080, 8090],
                        'handle redirects during OAuth authorization.'))
 
 
-class ClientRedirectServer(BaseHTTPServer.HTTPServer):
+class ClientRedirectServer(http.server.HTTPServer):
   """A server to handle OAuth 1.0 redirects back to localhost.
 
   Waits for a single request and parses the query parameters
@@ -62,7 +62,7 @@ class ClientRedirectServer(BaseHTTPServer.HTTPServer):
   query_params = {}
 
 
-class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class ClientRedirectHandler(http.server.BaseHTTPRequestHandler):
   """A handler for OAuth 1.0 redirects back to localhost.
 
   Waits for a single request and parses the query parameters
@@ -112,9 +112,9 @@ def run(flow, storage):
     for port in FLAGS.auth_host_port:
       port_number = port
       try:
-        httpd = BaseHTTPServer.HTTPServer((FLAGS.auth_host_name, port),
+        httpd = http.server.HTTPServer((FLAGS.auth_host_name, port),
             ClientRedirectHandler)
-      except socket.error, e:
+      except socket.error as e:
         pass
       else:
         success = True
@@ -127,13 +127,13 @@ def run(flow, storage):
     oauth_callback = 'oob'
   authorize_url = flow.step1_get_authorize_url(oauth_callback)
 
-  print 'Go to the following link in your browser:'
-  print authorize_url
-  print
+  print('Go to the following link in your browser:')
+  print(authorize_url)
+  print()
   if FLAGS.auth_local_webserver:
-    print 'If your browser is on a different machine then exit and re-run this'
-    print 'application with the command-line parameter --noauth_local_webserver.'
-    print
+    print('If your browser is on a different machine then exit and re-run this')
+    print('application with the command-line parameter --noauth_local_webserver.')
+    print()
 
   if FLAGS.auth_local_webserver:
     httpd.handle_request()
@@ -144,8 +144,8 @@ def run(flow, storage):
   else:
     accepted = 'n'
     while accepted.lower() == 'n':
-      accepted = raw_input('Have you authorized me? (y/n) ')
-    code = raw_input('What is the verification code? ').strip()
+      accepted = input('Have you authorized me? (y/n) ')
+    code = input('What is the verification code? ').strip()
 
   try:
     credentials = flow.step2_exchange(code)
@@ -154,6 +154,6 @@ def run(flow, storage):
 
   storage.put(credentials)
   credentials.set_store(storage.put)
-  print "You have successfully authenticated."
+  print("You have successfully authenticated.")
 
   return credentials

@@ -22,7 +22,7 @@ if sys.version_info[0] == 2:
 
     byte_from_int = chr
 
-    string_type = basestring
+    string_type = str
 
     string_type_name = 'string'
 else:

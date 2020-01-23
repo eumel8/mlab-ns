@@ -16,7 +16,7 @@ import warnings
 
 from base64 import b64encode
 
-from .compat import urlparse, str, basestring
+from .compat import urlparse, str, str
 from .cookies import extract_cookies_to_jar
 from ._internal_utils import to_native_string
 from .utils import parse_dict_header
@@ -35,7 +35,7 @@ def _basic_auth_str(username, password):
     #
     # These are here solely to maintain backwards compatibility
     # for things like ints. This will be removed in 3.0.0.
-    if not isinstance(username, basestring):
+    if not isinstance(username, str):
         warnings.warn(
             "Non-string usernames will no longer be supported in Requests "
             "3.0.0. Please convert the object you've passed in ({0!r}) to "
@@ -45,7 +45,7 @@ def _basic_auth_str(username, password):
         )
         username = str(username)
 
-    if not isinstance(password, basestring):
+    if not isinstance(password, str):
         warnings.warn(
             "Non-string passwords will no longer be supported in Requests "
             "3.0.0. Please convert the object you've passed in ({0!r}) to "

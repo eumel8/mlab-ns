@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from google.appengine.api import app_identity
 from google.appengine.api import memcache
@@ -81,8 +81,8 @@ class SiteRegistrationHandler(webapp.RequestHandler):
             return util.send_not_found(self)
 
         try:
-            sites_json = json.loads(urllib2.urlopen(json_file).read())
-        except urllib2.HTTPError:
+            sites_json = json.loads(urllib.request.urlopen(json_file).read())
+        except urllib.error.HTTPError:
             # TODO(claudiu) Notify(email) when this happens.
             logging.error('Cannot open %s.', json_file)
             return util.send_not_found(self)
@@ -149,7 +149,7 @@ class SiteRegistrationHandler(webapp.RequestHandler):
                           latitude=lat_long,
                           longitude=lon_long,
                           metro=site[self.METRO_FIELD],
-                          registration_timestamp=long(time.time()),
+                          registration_timestamp=int(time.time()),
                           key_name=site[self.SITE_FIELD],
                           roundrobin=site[self.ROUNDROBIN_FIELD])
 
@@ -187,9 +187,9 @@ class IPUpdateHandler():
             return util.send_not_found(self)
 
         try:
-            raw_json = urllib2.urlopen(host_ips_url).read()
+            raw_json = urllib.request.urlopen(host_ips_url).read()
             logging.info('Fetched hostnames.json from: %s', host_ips_url)
-        except urllib2.HTTPError:
+        except urllib.error.HTTPError:
             # TODO(claudiu) Notify(email) when this happens.
             logging.error('Cannot open %s.', host_ips_url)
             return util.send_not_found(self)
@@ -226,7 +226,7 @@ class IPUpdateHandler():
                 continue
 
             # If mlab-ns does not support this site, then skip it.
-            site = list(filter(lambda s: s.site_id == site_id, sites))
+            site = list([s for s in sites if s.site_id == site_id])
             if len(site) == 0:
                 logging.info('mlab-ns does not support site %s.', site_id)
                 continue
@@ -236,16 +236,14 @@ class IPUpdateHandler():
             # If mlab-ns does not serve/support this slice, then skip it. Note:
             # a given slice_id might have multiple tools (e.g., iupui_ndt has
             # both 'ndt' and 'ndt_ssl' tools.
-            slice_tools = list(filter(lambda t: t.slice_id == slice_id, tools))
+            slice_tools = list([t for t in tools if t.slice_id == slice_id])
 
             if len(slice_tools) == 0:
                 continue
 
             for slice_tool in slice_tools:
                 # See if this sliver_tool already exists in the datastore.
-                slivertool = list(filter(
-                    lambda st: st.fqdn == fqdn and st.tool_id == slice_tool.tool_id,
-                    slivertools))
+                slivertool = list([st for st in slivertools if st.fqdn == fqdn and st.tool_id == slice_tool.tool_id])
 
                 # Check to see if the sliver_tool already exists in the
                 # datastore. If not, add it to the datastore.
@@ -327,7 +325,7 @@ class IPUpdateHandler():
             roundrobin=site.roundrobin,
             city=site.city,
             country=site.country,
-            update_request_timestamp=long(time.time()),
+            update_request_timestamp=int(time.time()),
             key_name=sliver_tool_id)
 
 
@@ -490,7 +488,7 @@ class StatusUpdateHandler(webapp.RequestHandler):
                 logging.error('Unexpected address family: %s.', family)
                 continue
 
-            sliver_tool.update_request_timestamp = long(time.time())
+            sliver_tool.update_request_timestamp = int(time.time())
             updated_sliver_tools.append(sliver_tool)
 
         if updated_sliver_tools:

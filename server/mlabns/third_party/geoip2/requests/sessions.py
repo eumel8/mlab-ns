@@ -71,7 +71,7 @@ def merge_setting(request_setting, session_setting, dict_class=OrderedDict):
 
     # Remove keys that are set to None. Extract keys first to avoid altering
     # the dictionary during iteration.
-    none_keys = [k for (k, v) in merged_setting.items() if v is None]
+    none_keys = [k for (k, v) in list(merged_setting.items()) if v is None]
     for key in none_keys:
         del merged_setting[key]
 
@@ -670,7 +670,7 @@ class Session(SessionRedirectMixin):
             # Set environment's proxies.
             no_proxy = proxies.get('no_proxy') if proxies is not None else None
             env_proxies = get_environ_proxies(url, no_proxy=no_proxy)
-            for (k, v) in env_proxies.items():
+            for (k, v) in list(env_proxies.items()):
                 proxies.setdefault(k, v)
 
             # Look for requests environment configuration and be compatible
@@ -694,7 +694,7 @@ class Session(SessionRedirectMixin):
 
         :rtype: requests.adapters.BaseAdapter
         """
-        for (prefix, adapter) in self.adapters.items():
+        for (prefix, adapter) in list(self.adapters.items()):
 
             if url.lower().startswith(prefix):
                 return adapter
@@ -704,7 +704,7 @@ class Session(SessionRedirectMixin):
 
     def close(self):
         """Closes all adapters and as such the session"""
-        for v in self.adapters.values():
+        for v in list(self.adapters.values()):
             v.close()
 
     def mount(self, prefix, adapter):
@@ -723,7 +723,7 @@ class Session(SessionRedirectMixin):
         return state
 
     def __setstate__(self, state):
-        for attr, value in state.items():
+        for attr, value in list(state.items()):
             setattr(self, attr, value)
 
 

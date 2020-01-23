@@ -15,13 +15,13 @@
 # limitations under the License.
 
 try:
-  from pipeline import *
-except ImportError, e:
+  from .pipeline import *
+except ImportError as e:
   import logging
   logging.warning(
       'Could not load Pipeline API. Will fix path for testing. %s: %s',
       e.__class__.__name__, str(e))
-  import testutil
+  from . import testutil
   testutil.fix_path()
   del logging
-  from pipeline import *
+  from .pipeline import *

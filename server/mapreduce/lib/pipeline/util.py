@@ -68,7 +68,7 @@ def for_name(fq_name, recursive=False):
     else:
       raise ImportError("Could not find '%s' on path '%s'" % (
                         short_name, module_name))
-  except ImportError, e:
+  except ImportError as e:
     # module_name is not actually a module. Try for_name for it to figure
     # out what's this.
     try:
@@ -106,5 +106,5 @@ def is_generator_function(obj):
   """
   CO_GENERATOR = 0x20
   return bool(((inspect.isfunction(obj) or inspect.ismethod(obj)) and
-               obj.func_code.co_flags & CO_GENERATOR))
+               obj.__code__.co_flags & CO_GENERATOR))
 

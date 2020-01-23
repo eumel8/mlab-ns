@@ -5,7 +5,7 @@ maxminddb.reader
 This module contains the pure Python database reader and related classes.
 
 """
-from __future__ import unicode_literals
+
 
 try:
     import mmap
@@ -302,7 +302,7 @@ class Metadata(object):
         return self.node_count * self.node_byte_size
 
     def __repr__(self):
-        args = ', '.join('%s=%r' % x for x in self.__dict__.items())
+        args = ', '.join('%s=%r' % x for x in list(self.__dict__.items()))
         return '{module}.{class_name}({data})'.format(
             module=self.__module__,
             class_name=self.__class__.__name__,

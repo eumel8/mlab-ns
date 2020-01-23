@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 import errno
 import logging
 import sys
@@ -45,7 +45,7 @@ from .util.url import get_host, Url
 
 if six.PY2:
     # Queue is imported for side effects on MS Windows
-    import Queue as _unused_module_Queue  # noqa: F401
+    import queue as _unused_module_Queue  # noqa: F401
 
 xrange = six.moves.xrange
 
@@ -185,7 +185,7 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
         self.proxy_headers = _proxy_headers or {}
 
         # Fill the queue up so that doing get() on it will block properly
-        for _ in xrange(maxsize):
+        for _ in range(maxsize):
             self.pool.put(None)
 
         # These are mostly for testing and debugging purposes.

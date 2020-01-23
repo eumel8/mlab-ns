@@ -5,7 +5,7 @@ maxminddb.decoder
 This package contains code for decoding the MaxMind DB data section.
 
 """
-from __future__ import unicode_literals
+
 
 import struct
 

@@ -1,8 +1,8 @@
 import json
 import logging
 import textwrap
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
 from mlabns.util import constants
 from mlabns.util import message
@@ -189,12 +189,12 @@ def authenticate_prometheus(prometheus):
     Returns:
         A urllib2 OpenerDirector object.
     """
-    password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    password_manager = urllib.request.HTTPPasswordMgrWithDefaultRealm()
     password_manager.add_password(None, prometheus.url, prometheus.username,
                                   prometheus.password)
 
-    authhandler = urllib2.HTTPBasicAuthHandler(password_manager)
-    opener = urllib2.build_opener(authhandler)
+    authhandler = urllib.request.HTTPBasicAuthHandler(password_manager)
+    opener = urllib.request.build_opener(authhandler)
     return opener
 
 
@@ -244,7 +244,7 @@ def get_slice_info(prometheus_base_url, tool_id, address_family):
     if not tool_name in QUERIES:
         logging.error('There is no Prometheus query for tool: %s', tool_name)
         return None
-    query = urllib.quote_plus(QUERIES[tool_name])
+    query = urllib.parse.quote_plus(QUERIES[tool_name])
     slice_url = prometheus_base_url + query
     return PrometheusSliceInfo(slice_url, tool_id, address_family)
 
@@ -272,7 +272,7 @@ def get_slice_status(url, opener):
     results = {}
     try:
         raw_data = opener.open(url).read()
-    except urllib2.HTTPError:
+    except urllib.error.HTTPError:
         logging.error('Cannot open %s.', url)
         return None
 

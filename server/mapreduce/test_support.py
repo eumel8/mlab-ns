@@ -43,7 +43,7 @@ def decode_task_payload(task):
     return {}
   decoded = base64.b64decode(body)
   result = {}
-  for (name, value) in cgi.parse_qs(decoded).items():
+  for (name, value) in list(cgi.parse_qs(decoded).items()):
     if len(value) == 1:
       result[name] = value[0]
     else:
@@ -96,7 +96,7 @@ def execute_task(task, handlers_map=None):
     os.environ = dict(os.environ)
     os.environ.update(handler.request.environ)
     if task["method"] == "POST":
-      for k, v in decode_task_payload(task).items():
+      for k, v in list(decode_task_payload(task).items()):
         handler.request.set(k, v)
       handler.post()
     elif task["method"] == "GET":

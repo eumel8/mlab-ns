@@ -3,10 +3,8 @@
 from abc import ABCMeta
 
 
-class SimpleEquality(object):
+class SimpleEquality(object, metaclass=ABCMeta):
     """Naive __dict__ equality mixin"""
-
-    __metaclass__ = ABCMeta
 
     def __eq__(self, other):
         return (isinstance(other, self.__class__)

@@ -20,7 +20,7 @@
 
 """App Engine Files API."""
 
-from __future__ import with_statement
+
 
 
 __all__ = [
@@ -61,7 +61,7 @@ __all__ = [
 import gc
 import os
 import sys
-import StringIO
+import io
 
 from google.appengine.api import apiproxy_stub_map
 from mapreduce.lib.files import file_service_pb
@@ -246,7 +246,7 @@ def _make_call(method, request, response,
   rpc.wait()
   try:
     rpc.check_success()
-  except apiproxy_errors.ApplicationError, e:
+  except apiproxy_errors.ApplicationError as e:
     _raise_app_error(e)
 
 
@@ -371,12 +371,12 @@ class _File(object):
       raise UnsupportedContentTypeError(
           'Unsupported content type: %s' % self._content_type)
 
-    buf = StringIO.StringIO()
+    buf = io.StringIO()
     original_offset = self._offset
 
     try:
       if size is None:
-        size = sys.maxint
+        size = sys.maxsize
 
       while size > 0:
         request = file_service_pb.ReadRequest()
@@ -484,7 +484,7 @@ def open(filename, mode='r', content_type=RAW, exclusive_lock=False):
   """
   if not filename:
     raise InvalidArgumentError('Filename is empty')
-  if not isinstance(filename, basestring):
+  if not isinstance(filename, str):
     raise InvalidArgumentError('Filename should be a string but is %s (%s)' %
                                (filename.__class__, filename))
   if content_type != RAW:
@@ -507,7 +507,7 @@ def finalize(filename, content_type=RAW):
   """
   if not filename:
     raise InvalidArgumentError('Filename is empty')
-  if not isinstance(filename, basestring):
+  if not isinstance(filename, str):
     raise InvalidArgumentError('Filename should be a string')
   if content_type != RAW:
     raise InvalidArgumentError('Invalid content type')
@@ -549,7 +549,7 @@ def stat(filename):
   """
   if not filename:
     raise InvalidArgumentError('Filename is empty')
-  if not isinstance(filename, basestring):
+  if not isinstance(filename, str):
     raise InvalidArgumentError('Filename should be a string')
 
   with open(filename, 'r') as f:
@@ -569,7 +569,7 @@ def _create(filesystem, content_type=RAW, filename=None, params=None):
   """
   if not filesystem:
     raise InvalidArgumentError('Filesystem is empty')
-  if not isinstance(filesystem, basestring):
+  if not isinstance(filesystem, str):
     raise InvalidArgumentError('Filesystem should be a string')
   if content_type != RAW:
     raise InvalidArgumentError('Invalid content type')
@@ -581,14 +581,14 @@ def _create(filesystem, content_type=RAW, filename=None, params=None):
   request.set_content_type(content_type)
 
   if filename:
-    if not isinstance(filename, basestring):
+    if not isinstance(filename, str):
       raise InvalidArgumentError('Filename should be a string')
     request.set_filename(filename)
 
   if params:
     if not isinstance(params, dict):
       raise InvalidArgumentError('Parameters should be a dictionary')
-    for k,v in params.items():
+    for k,v in list(params.items()):
       param = request.add_parameters()
       param.set_name(k)
       param.set_value(v)
@@ -605,7 +605,7 @@ def delete(filename):
   """
   from mapreduce.lib.files import blobstore as files_blobstore
 
-  if not isinstance(filename, basestring):
+  if not isinstance(filename, str):
     raise InvalidArgumentError('Filename should be a string, but is %s(%r)' %
                                (filename.__class__.__name__, filename))
   if filename.startswith(files_blobstore._BLOBSTORE_DIRECTORY):

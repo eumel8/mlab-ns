@@ -2,7 +2,7 @@
 def _IsColor(color):
   """Try to determine if color is a hex color string.  
   Labels that look like hex colors will match too, unfortunately."""
-  if not isinstance(color, basestring):
+  if not isinstance(color, str):
     return False
   color = color.strip('#')
   if len(color) != 3 and len(color) != 6:

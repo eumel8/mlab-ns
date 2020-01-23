@@ -81,11 +81,11 @@ def get_ip_geolocation(ip_address):
     """
     try:
         geo_response = get_geo_reader().city(ip_address)
-    except ValueError, e:
+    except ValueError as e:
         logging.error('Malformed IP address %s for MaxMind lookup: %s',
                       ip_address, e)
         return GeoRecord()
-    except geoip2.errors.AddressNotFoundError, e:
+    except geoip2.errors.AddressNotFoundError as e:
         logging.error('IP address not found in MaxMind database: %s',
                       ip_address)
         return GeoRecord()

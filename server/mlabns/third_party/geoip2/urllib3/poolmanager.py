@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 import collections
 import functools
 import logging
@@ -82,7 +82,7 @@ def _default_key_normalizer(key_class, request_context):
     # These are both dictionaries and need to be transformed into frozensets
     for key in ('headers', '_proxy_headers', '_socks_options'):
         if key in context and context[key] is not None:
-            context[key] = frozenset(context[key].items())
+            context[key] = frozenset(list(context[key].items()))
 
     # The socket_options key may be a list and needs to be transformed into a
     # tuple.
@@ -288,7 +288,7 @@ class PoolManager(RequestMethods):
         """
         base_pool_kwargs = self.connection_pool_kw.copy()
         if override:
-            for key, value in override.items():
+            for key, value in list(override.items()):
                 if value is None:
                     try:
                         del base_pool_kwargs[key]

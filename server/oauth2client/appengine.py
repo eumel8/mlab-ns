@@ -25,15 +25,15 @@ import logging
 import pickle
 import time
 
-import clientsecrets
+from . import clientsecrets
 
-from anyjson import simplejson
-from client import AccessTokenRefreshError
-from client import AssertionCredentials
-from client import Credentials
-from client import Flow
-from client import OAuth2WebServerFlow
-from client import Storage
+from .anyjson import simplejson
+from .client import AccessTokenRefreshError
+from .client import AssertionCredentials
+from .client import Credentials
+from .client import Flow
+from .client import OAuth2WebServerFlow
+from .client import Storage
 from google.appengine.api import memcache
 from google.appengine.api import users
 from google.appengine.api.app_identity import app_identity

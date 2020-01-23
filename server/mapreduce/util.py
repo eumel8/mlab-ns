@@ -36,7 +36,7 @@ import inspect
 import logging
 import zlib
 import types
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from mapreduce.lib import files
 from google.appengine.api import taskqueue
@@ -93,7 +93,7 @@ def for_name(fq_name, recursive=False):
     else:
       raise ImportError("Could not find '%s' on path '%s'" % (
                         short_name, module_name))
-  except ImportError, e:
+  except ImportError as e:
     logging.debug("Could not import %s from %s. Will try recursively.",
                   short_name, module_name, exc_info=True)
     # module_name is not actually a module. Try for_name for it to figure
@@ -131,12 +131,12 @@ def handler_for_name(fq_name):
     handler instance which is ready to be called.
   """
   resolved_name = for_name(fq_name)
-  if isinstance(resolved_name, (type, types.ClassType)):
+  if isinstance(resolved_name, type):
     # create new instance if this is type
     return resolved_name()
   elif isinstance(resolved_name, types.MethodType):
     # bind the method
-    return getattr(resolved_name.im_class(), resolved_name.__name__)
+    return getattr(resolved_name.__self__.__class__(), resolved_name.__name__)
   else:
     return resolved_name
 
@@ -160,7 +160,7 @@ def is_generator(obj):
 
   CO_GENERATOR = 0x20
   return bool(((inspect.isfunction(obj) or inspect.ismethod(obj)) and
-               obj.func_code.co_flags & CO_GENERATOR))
+               obj.__code__.co_flags & CO_GENERATOR))
 
 
 def get_short_name(fq_name):
@@ -246,7 +246,7 @@ class HugeTask(object):
 
   def add(self, queue_name, transactional=False, parent=None):
     """Add task to the queue."""
-    payload_str = urllib.urlencode(self.params)
+    payload_str = urllib.parse.urlencode(self.params)
     if len(payload_str) < self.MAX_TASK_PAYLOAD:
       # Payload is small. Don't bother with anything.
       task = self.to_task()
@@ -310,7 +310,7 @@ class HugeTask(object):
     payload_str = zlib.decompress(base64.b64decode(payload))
 
     result = {}
-    for (name, value) in cgi.parse_qs(payload_str).items():
+    for (name, value) in list(cgi.parse_qs(payload_str).items()):
       if len(value) == 1:
         result[name] = value[0]
       else:

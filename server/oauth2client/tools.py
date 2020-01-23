@@ -23,16 +23,16 @@ __author__ = 'jcgregorio@google.com (Joe Gregorio)'
 __all__ = ['run']
 
 
-import BaseHTTPServer
+import http.server
 import gflags
 import socket
 import sys
 import webbrowser
 
-from client import FlowExchangeError
+from .client import FlowExchangeError
 
 try:
-  from urlparse import parse_qsl
+  from urllib.parse import parse_qsl
 except ImportError:
   from cgi import parse_qsl
 
@@ -52,7 +52,7 @@ gflags.DEFINE_multi_int('auth_host_port', [8080, 8090],
                          'handle redirects during OAuth authorization.'))
 
 
-class ClientRedirectServer(BaseHTTPServer.HTTPServer):
+class ClientRedirectServer(http.server.HTTPServer):
   """A server to handle OAuth 2.0 redirects back to localhost.
 
   Waits for a single request and parses the query parameters
@@ -61,7 +61,7 @@ class ClientRedirectServer(BaseHTTPServer.HTTPServer):
   query_params = {}
 
 
-class ClientRedirectHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class ClientRedirectHandler(http.server.BaseHTTPRequestHandler):
   """A handler for OAuth 2.0 redirects back to localhost.
 
   Waits for a single request and parses the query parameters
@@ -108,7 +108,7 @@ def run(flow, storage):
       try:
         httpd = ClientRedirectServer((FLAGS.auth_host_name, port),
                                      ClientRedirectHandler)
-      except socket.error, e:
+      except socket.error as e:
         pass
       else:
         success = True
@@ -123,20 +123,20 @@ def run(flow, storage):
 
   if FLAGS.auth_local_webserver:
     webbrowser.open(authorize_url, new=1, autoraise=True)
-    print 'Your browser has been opened to visit:'
-    print
-    print '    ' + authorize_url
-    print
-    print 'If your browser is on a different machine then exit and re-run this'
-    print 'application with the command-line parameter '
-    print
-    print '  --noauth_local_webserver'
-    print
+    print('Your browser has been opened to visit:')
+    print()
+    print('    ' + authorize_url)
+    print()
+    print('If your browser is on a different machine then exit and re-run this')
+    print('application with the command-line parameter ')
+    print()
+    print('  --noauth_local_webserver')
+    print()
   else:
-    print 'Go to the following link in your browser:'
-    print
-    print '    ' + authorize_url
-    print
+    print('Go to the following link in your browser:')
+    print()
+    print('    ' + authorize_url)
+    print()
 
   code = None
   if FLAGS.auth_local_webserver:
@@ -146,18 +146,18 @@ def run(flow, storage):
     if 'code' in httpd.query_params:
       code = httpd.query_params['code']
     else:
-      print 'Failed to find "code" in the query parameters of the redirect.'
+      print('Failed to find "code" in the query parameters of the redirect.')
       sys.exit('Try running with --noauth_local_webserver.')
   else:
-    code = raw_input('Enter verification code: ').strip()
+    code = input('Enter verification code: ').strip()
 
   try:
     credential = flow.step2_exchange(code)
-  except FlowExchangeError, e:
+  except FlowExchangeError as e:
     sys.exit('Authentication has failed: %s' % e)
 
   storage.put(credential)
   credential.set_store(storage)
-  print 'Authentication successful.'
+  print('Authentication successful.')
 
   return credential

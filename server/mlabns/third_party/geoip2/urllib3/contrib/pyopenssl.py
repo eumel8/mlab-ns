@@ -41,7 +41,7 @@ set the ``urllib3.contrib.pyopenssl.DEFAULT_SSL_CIPHER_LIST`` variable.
 .. _sni: https://en.wikipedia.org/wiki/Server_Name_Indication
 .. _crime attack: https://en.wikipedia.org/wiki/CRIME_(security_exploit)
 """
-from __future__ import absolute_import
+
 
 import OpenSSL.SSL
 from cryptography import x509
@@ -93,7 +93,7 @@ _stdlib_to_openssl_verify = {
         OpenSSL.SSL.VERIFY_PEER + OpenSSL.SSL.VERIFY_FAIL_IF_NO_PEER_CERT,
 }
 _openssl_to_stdlib_verify = dict(
-    (v, k) for k, v in _stdlib_to_openssl_verify.items()
+    (v, k) for k, v in list(_stdlib_to_openssl_verify.items())
 )
 
 # OpenSSL will only write 16K at a time
@@ -166,7 +166,7 @@ def _dnsname_to_stdlib(name):
         """
         import idna
 
-        for prefix in [u'*.', u'.']:
+        for prefix in ['*.', '.']:
             if name.startswith(prefix):
                 name = name[len(prefix):]
                 return prefix.encode('ascii') + idna.encode(name)

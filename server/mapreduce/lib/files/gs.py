@@ -25,7 +25,7 @@
 
 
 
-from __future__ import with_statement
+
 
 
 __all__ = ['create']
@@ -75,47 +75,47 @@ def create(filename,
   """
   if not filename:
     raise files.InvalidArgumentError('Empty filename')
-  elif not isinstance(filename, basestring):
+  elif not isinstance(filename, str):
     raise files.InvalidArgumentError('Expected string for filename', filename)
   elif not filename.startswith(_GS_PREFIX) or filename == _GS_PREFIX:
     raise files.InvalidArgumentError(
         'Google storage files must be of the form /gs/bucket/object', filename)
   elif not mime_type:
     raise files.InvalidArgumentError('Empty mime_type')
-  elif not isinstance(mime_type, basestring):
+  elif not isinstance(mime_type, str):
     raise files.InvalidArgumentError('Expected string for mime_type', mime_type)
 
   params = {_MIME_TYPE_PARAMETER: mime_type}
 
   if acl:
-    if not isinstance(acl, basestring):
+    if not isinstance(acl, str):
       raise files.InvalidArgumentError('Expected string for acl', acl)
     params[_CANNED_ACL_PARAMETER] = acl
 
   if content_encoding:
-    if not isinstance(content_encoding, basestring):
+    if not isinstance(content_encoding, str):
       raise files.InvalidArgumentError('Expected string for content_encoding')
     else:
       params[_CONTENT_ENCODING_PARAMETER] = content_encoding
   if content_disposition:
-    if not isinstance(content_disposition, basestring):
+    if not isinstance(content_disposition, str):
       raise files.InvalidArgumentError(
           'Expected string for content_disposition')
     else:
       params[_CONTENT_DISPOSITION_PARAMETER] = content_disposition
   if cache_control:
-    if not isinstance(cache_control, basestring):
+    if not isinstance(cache_control, str):
       raise files.InvalidArgumentError('Expected string for cache_control')
     else:
       params[_CACHE_CONTROL_PARAMETER] = cache_control
   if user_metadata:
     if not isinstance(user_metadata, dict):
       raise files.InvalidArgumentError('Expected dict for user_metadata')
-    for key, value in user_metadata.items():
-      if not isinstance(key, basestring):
+    for key, value in list(user_metadata.items()):
+      if not isinstance(key, str):
         raise files.InvalidArgumentError(
             'Expected string for key in user_metadata')
-      if not isinstance(value, basestring):
+      if not isinstance(value, str):
         raise files.InvalidArgumentError(
             'Expected string for value in user_metadata for key: ', key)
       params[_USER_METADATA_PREFIX + key] = value

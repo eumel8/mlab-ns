@@ -16,7 +16,7 @@
 
 """Output writers for MapReduce."""
 
-from __future__ import with_statement
+
 
 
 
@@ -207,13 +207,13 @@ def _get_params(mapper_spec, allowed_keys=None):
     else:
       logging.warning(message)
     params = mapper_spec.params
-    params = dict((str(n), v) for n, v in params.iteritems())
+    params = dict((str(n), v) for n, v in params.items())
   else:
     if not isinstance(mapper_spec.params.get("output_writer"), dict):
       raise BadWriterParamsError(
           "Output writer parameters should be a dictionary")
     params = mapper_spec.params.get("output_writer")
-    params = dict((str(n), v) for n, v in params.iteritems())
+    params = dict((str(n), v) for n, v in params.items())
     if allowed_keys:
       params_diff = set(params.keys()) - allowed_keys
       if params_diff:
@@ -267,7 +267,7 @@ class _FilePool(object):
   def flush(self):
     """Flush pool contents."""
     start_time = time.time()
-    for filename, data in self._append_buffer.iteritems():
+    for filename, data in self._append_buffer.items():
       with files.open(filename, "a") as f:
         if len(data) > self._flush_size:
           raise errors.Error("Bad data: %s" % len(data))
@@ -558,7 +558,7 @@ class FileOutputWriterBase(OutputWriter):
     output_sharding = cls._get_output_sharding(mapreduce_state=mapreduce_state)
     filesystem = cls._get_filesystem(mapreduce_state.mapreduce_spec.mapper)
     finalized_filenames = []
-    for create_filename, request_filename in itertools.izip(
+    for create_filename, request_filename in zip(
         state.filenames, state.request_filenames):
       if output_sharding != cls.OUTPUT_SHARDING_INPUT_SHARDS:
         files.finalize(create_filename)

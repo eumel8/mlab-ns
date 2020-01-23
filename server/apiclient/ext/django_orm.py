@@ -19,9 +19,7 @@ import pickle
 from django.db import models
 
 
-class OAuthCredentialsField(models.Field):
-
-  __metaclass__ = models.SubfieldBase
+class OAuthCredentialsField(models.Field, metaclass=models.SubfieldBase):
 
   def db_type(self):
     return 'VARCHAR'
@@ -37,15 +35,13 @@ class OAuthCredentialsField(models.Field):
     return base64.b64encode(pickle.dumps(value))
 
 
-class FlowThreeLeggedField(models.Field):
-
-  __metaclass__ = models.SubfieldBase
+class FlowThreeLeggedField(models.Field, metaclass=models.SubfieldBase):
 
   def db_type(self):
     return 'VARCHAR'
 
   def to_python(self, value):
-    print "In to_python", value
+    print("In to_python", value)
     if value is None:
       return None
     if isinstance(value, apiclient.oauth.FlowThreeLegged):

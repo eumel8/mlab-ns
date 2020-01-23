@@ -46,7 +46,7 @@ def _filter_by_status(tools, address_family, status):
 
 def _filter_by_country(tools, country):
     """Filters sliver tools based on the tool's country."""
-    return filter(lambda t: t.country == country, tools)
+    return [t for t in tools if t.country == country]
 
 
 def _filter_choose_one_host_per_site(tools):
@@ -92,7 +92,7 @@ def _filter_choose_one_host_per_site(tools):
                 sites[tool.site_id] = min(sites[tool.site_id],
                                           tool,
                                           key=lambda t: t.fqdn)
-    return [tool for tool in sites.values()]
+    return [tool for tool in list(sites.values())]
 
 
 def _find_site_ids_for_metro(metro):

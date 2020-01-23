@@ -345,7 +345,7 @@ class MapperWorkerCallbackHandler(util.HugeTaskHandler):
       try:
         worker_task.add(queue_name, parent=shard_state)
       except (taskqueue.TombstonedTaskError,
-              taskqueue.TaskAlreadyExistsError), e:
+              taskqueue.TaskAlreadyExistsError) as e:
         logging.warning("Task %r with params %r already exists. %s: %s",
                         task_name,
                         transient_shard_state.to_dict(),
@@ -605,7 +605,7 @@ class ControllerCallbackHandler(util.HugeTaskHandler):
       try:
         controller_callback_task.add(queue_name, parent=mapreduce_state)
       except (taskqueue.TombstonedTaskError,
-              taskqueue.TaskAlreadyExistsError), e:
+              taskqueue.TaskAlreadyExistsError) as e:
         logging.warning("Task %r with params %r already exists. %s: %s",
                         task_name, task_params, e.__class__, e)
 
@@ -958,7 +958,7 @@ class FinalizeJobHandler(base_handler.TaskQueueHandler):
       try:
         finalize_task.add(queue_name)
       except (taskqueue.TombstonedTaskError,
-              taskqueue.TaskAlreadyExistsError), e:
+              taskqueue.TaskAlreadyExistsError) as e:
         logging.warning("Task %r already exists. %s: %s",
                         task_name, e.__class__, e)
 

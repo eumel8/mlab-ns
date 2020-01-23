@@ -1,6 +1,6 @@
 import mock
 import unittest2
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from mlabns.db import model
 from mlabns.handlers import lookup

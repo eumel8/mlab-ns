@@ -1,2 +1,2 @@
 from certifi import where
-print(where())
+print((where()))

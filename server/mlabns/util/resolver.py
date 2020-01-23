@@ -103,12 +103,10 @@ class GeoResolver(ResolverBase):
             logging.info('SIGNATURE_FOUND: %f returned from memcache for %s',
                          prob, self.client_signature)
             # Filter the candidates sites, only keep the '0c' sites
-            filtered_candidates = filter(lambda c: c.site_id[-1] == 'c',
-                                         candidates)
+            filtered_candidates = [c for c in candidates if c.site_id[-1] == 'c']
         else:
             # Filter the candidates sites, only keep the regular sites
-            filtered_candidates = filter(lambda c: c.site_id[-1] != 'c',
-                                         candidates)
+            filtered_candidates = [c for c in candidates if c.site_id[-1] != 'c']
 
         for candidate in filtered_candidates:
             self._add_candidate(query, candidate, site_distances,

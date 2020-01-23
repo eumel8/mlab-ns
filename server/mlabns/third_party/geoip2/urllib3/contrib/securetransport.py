@@ -24,7 +24,7 @@ To use this module, simply import and inject it::
 
 Happy TLSing!
 """
-from __future__ import absolute_import
+
 
 import contextlib
 import ctypes

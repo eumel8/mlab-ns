@@ -25,26 +25,26 @@ __all__ = [
     'set_user_agent', 'tunnel_patch'
     ]
 
-import StringIO
+import io
 import copy
 import gzip
 import httplib2
-import mimeparse
+from . import mimeparse
 import mimetypes
 import os
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 import uuid
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.nonmultipart import MIMENonMultipart
 from email.parser import FeedParser
-from errors import BatchError
-from errors import HttpError
-from errors import ResumableUploadError
-from errors import UnexpectedBodyError
-from errors import UnexpectedMethodError
-from model import JsonModel
+from .errors import BatchError
+from .errors import HttpError
+from .errors import ResumableUploadError
+from .errors import UnexpectedBodyError
+from .errors import UnexpectedMethodError
+from .model import JsonModel
 from oauth2client.anyjson import simplejson
 
 
@@ -430,7 +430,7 @@ class BatchHttpRequest(object):
     if self._base_id is None:
       self._base_id = uuid.uuid4()
 
-    return '<%s+%s>' % (self._base_id, urllib.quote(id_))
+    return '<%s+%s>' % (self._base_id, urllib.parse.quote(id_))
 
   def _header_to_id(self, header):
     """Convert a Content-ID header value to an id.
@@ -453,7 +453,7 @@ class BatchHttpRequest(object):
       raise BatchError("Invalid value for Content-ID: %s" % header)
     base, id_ = header[1:-1].rsplit('+', 1)
 
-    return urllib.unquote(id_)
+    return urllib.parse.unquote(id_)
 
   def _serialize_request(self, request):
     """Convert an HttpRequest object into a string.
@@ -465,8 +465,8 @@ class BatchHttpRequest(object):
       The request as a string in application/http format.
     """
     # Construct status line
-    parsed = urlparse.urlparse(request.uri)
-    request_line = urlparse.urlunparse(
+    parsed = urllib.parse.urlparse(request.uri)
+    request_line = urllib.parse.urlunparse(
         (None, None, parsed.path, parsed.params, parsed.query, None)
         )
     status_line = request.method + ' ' + request_line + ' HTTP/1.1\n'
@@ -478,7 +478,7 @@ class BatchHttpRequest(object):
     if 'content-type' in headers:
       del headers['content-type']
 
-    for key, value in headers.iteritems():
+    for key, value in headers.items():
       msg[key] = value
     msg['Host'] = parsed.netloc
     msg.set_unixfrom(None)
@@ -651,7 +651,7 @@ class BatchHttpRequest(object):
       if content[0] != '{':
         gzipped_content = content
         content = gzip.GzipFile(
-            fileobj=StringIO.StringIO(gzipped_content)).read()
+            fileobj=io.StringIO(gzipped_content)).read()
 
       request, cb = self._requests[request_id]
       postproc = request.postproc

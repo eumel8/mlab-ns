@@ -27,7 +27,7 @@ from urllib3.exceptions import SSLError as _SSLError
 from urllib3.exceptions import ResponseError
 
 from .models import Response
-from .compat import urlparse, basestring
+from .compat import urlparse, str
 from .utils import (DEFAULT_CA_BUNDLE_PATH, get_encoding_from_headers,
                     prepend_scheme_if_needed, get_auth_from_url, urldefragauth,
                     select_proxy)
@@ -135,7 +135,7 @@ class HTTPAdapter(BaseAdapter):
         self.proxy_manager = {}
         self.config = {}
 
-        for attr, value in state.items():
+        for attr, value in list(state.items()):
             setattr(self, attr, value)
 
         self.init_poolmanager(self._pool_connections, self._pool_maxsize,
@@ -237,7 +237,7 @@ class HTTPAdapter(BaseAdapter):
             conn.ca_cert_dir = None
 
         if cert:
-            if not isinstance(cert, basestring):
+            if not isinstance(cert, str):
                 conn.cert_file = cert[0]
                 conn.key_file = cert[1]
             else:
@@ -317,7 +317,7 @@ class HTTPAdapter(BaseAdapter):
         which closes any pooled connections.
         """
         self.poolmanager.clear()
-        for proxy in self.proxy_manager.values():
+        for proxy in list(self.proxy_manager.values()):
             proxy.clear()
 
     def request_url(self, request, proxies):
@@ -452,7 +452,7 @@ class HTTPAdapter(BaseAdapter):
                                         url,
                                         skip_accept_encoding=True)
 
-                    for header, value in request.headers.items():
+                    for header, value in list(request.headers.items()):
                         low_conn.putheader(header, value)
 
                     low_conn.endheaders()

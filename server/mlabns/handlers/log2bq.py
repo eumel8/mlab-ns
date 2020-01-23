@@ -1,6 +1,6 @@
 # TODO(claudiu) Update this with the latest online version
 # http://code.google.com/p/log2bq/.
-import StringIO
+import io
 import csv
 import httplib2
 import os
@@ -71,7 +71,7 @@ def log2csv(request_log):
             break
 
     if row is not None:
-        s = StringIO.StringIO()
+        s = io.StringIO()
         w = csv.writer(s)
         w.writerow(row)
         line = s.getvalue()

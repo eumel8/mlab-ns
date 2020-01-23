@@ -21,7 +21,7 @@ import logging
 import time
 
 from OpenSSL import crypto
-from anyjson import simplejson
+from .anyjson import simplejson
 
 
 CLOCK_SKEW_SECS = 300  # 5 minutes in seconds
@@ -201,7 +201,7 @@ def verify_signed_jwt_with_certs(jwt, certs, audience):
 
   # Check signature.
   verified = False
-  for (keyname, pem) in certs.items():
+  for (keyname, pem) in list(certs.items()):
     verifier = Verifier.from_string(pem, True)
     if (verifier.verify(signed, signature)):
       verified = True
@@ -216,7 +216,7 @@ def verify_signed_jwt_with_certs(jwt, certs, audience):
   earliest = iat - CLOCK_SKEW_SECS
 
   # Check expiration timestamp.
-  now = long(time.time())
+  now = int(time.time())
   exp = parsed.get('exp')
   if exp is None:
     raise AppIdentityError('No exp field in token: %s' % json_body)

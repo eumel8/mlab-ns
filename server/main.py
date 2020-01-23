@@ -1,11 +1,11 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from mlabns.handlers import admin
-from mlabns.handlers import docs
-from mlabns.handlers import lookup
-from mlabns.handlers import privacy
-from mlabns.handlers import update
+from .mlabns.handlers import admin
+from .mlabns.handlers import docs
+from .mlabns.handlers import lookup
+from .mlabns.handlers import privacy
+from .mlabns.handlers import update
 # from mlabns.handlers import log2bq
 
 app = webapp.WSGIApplication(

@@ -11,10 +11,8 @@ from abc import ABCMeta
 from geoip2.mixins import SimpleEquality
 
 
-class Record(SimpleEquality):
+class Record(SimpleEquality, metaclass=ABCMeta):
     """All records are subclasses of the abstract class ``Record``."""
-
-    __metaclass__ = ABCMeta
 
     _valid_attributes = set()
 
@@ -26,17 +24,15 @@ class Record(SimpleEquality):
         raise AttributeError("can't set attribute")
 
     def __repr__(self):
-        args = ', '.join('%s=%r' % x for x in self.__dict__.items())
+        args = ', '.join('%s=%r' % x for x in list(self.__dict__.items()))
         return '{module}.{class_name}({data})'.format(
             module=self.__module__,
             class_name=self.__class__.__name__,
             data=args)
 
 
-class PlaceRecord(Record):
+class PlaceRecord(Record, metaclass=ABCMeta):
     """All records with :py:attr:`names` subclass :py:class:`PlaceRecord`."""
-
-    __metaclass__ = ABCMeta
 
     def __init__(self, locales=None, **kwargs):
         if locales is None:

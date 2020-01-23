@@ -7,11 +7,11 @@ from .intranges import intranges_contain
 
 _virama_combining_class = 9
 _alabel_prefix = b'xn--'
-_unicode_dots_re = re.compile(u'[\u002e\u3002\uff0e\uff61]')
+_unicode_dots_re = re.compile('[\u002e\u3002\uff0e\uff61]')
 
 if sys.version_info[0] == 3:
-    unicode = str
-    unichr = chr
+    str = str
+    chr = chr
 
 class IDNAError(UnicodeError):
     """ Base exception for all IDNA-encoding related problems """
@@ -34,7 +34,7 @@ class InvalidCodepointContext(IDNAError):
 
 
 def _combining_class(cp):
-    return unicodedata.combining(unichr(cp))
+    return unicodedata.combining(chr(cp))
 
 def _is_script(cp, script):
     return intranges_contain(ord(cp), idnadata.scripts[script])
@@ -209,7 +209,7 @@ def valid_contexto(label, pos, exception=False):
 
     elif cp_value == 0x30fb:
         for cp in label:
-            if cp == u'\u30fb':
+            if cp == '\u30fb':
                 continue
             if _is_script(cp, 'Hiragana') or _is_script(cp, 'Katakana') or _is_script(cp, 'Han'):
                 return True
@@ -272,7 +272,7 @@ def alabel(label):
     if not label:
         raise IDNAError('No Input')
 
-    label = unicode(label)
+    label = str(label)
     check_label(label)
     label = _punycode(label)
     label = _alabel_prefix + label
@@ -307,7 +307,7 @@ def ulabel(label):
 def uts46_remap(domain, std3_rules=True, transitional=False):
     """Re-map the characters in the string according to UTS46 processing."""
     from .uts46data import uts46data
-    output = u""
+    output = ""
     try:
         for pos, char in enumerate(domain):
             code_point = ord(char)
@@ -372,7 +372,7 @@ def decode(s, strict=False, uts46=False, std3_rules=False):
     if not strict:
         labels = _unicode_dots_re.split(s)
     else:
-        labels = s.split(u'.')
+        labels = s.split('.')
     while labels and not labels[0]:
         del labels[0]
     if not labels:
@@ -383,5 +383,5 @@ def decode(s, strict=False, uts46=False, std3_rules=False):
     for label in labels:
         result.append(ulabel(label))
     if trailing_dot:
-        result.append(u'')
-    return u'.'.join(result)
+        result.append('')
+    return '.'.join(result)

@@ -120,7 +120,7 @@ class JsonHandler(BaseHandler):
       self.json_response.clear()
       self.json_response["error_class"] = "Notice"
       self.json_response["error_message"] = "Could not find 'mapreduce.yaml'"
-    except Exception, e:
+    except Exception as e:
       logging.exception("Error in JsonHandler, returning exception.")
       # TODO(user): Include full traceback here for the end-user.
       self.json_response.clear()

@@ -302,10 +302,8 @@ class Enterprise(City):
     """
 
 
-class SimpleModel(SimpleEquality):
+class SimpleModel(SimpleEquality, metaclass=ABCMeta):
     """Provides basic methods for non-location models"""
-
-    __metaclass__ = ABCMeta
 
     def __repr__(self):
         # pylint: disable=no-member

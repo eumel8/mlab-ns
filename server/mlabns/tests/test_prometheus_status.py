@@ -1,7 +1,7 @@
 import mock
 import unittest2
-import urllib
-import urllib2
+import urllib.request, urllib.parse, urllib.error
+import urllib.request, urllib.error, urllib.parse
 
 from mlabns.util import constants
 from mlabns.util import message
@@ -45,13 +45,13 @@ class GetSliceInfoTest(unittest2.TestCase):
         self.assertIsNone(retrieved)
 
     def test_get_slice_info_returns_valid_objects_when_tools_stored(self):
-        ndt_url_ipv4 = self.prometheus_base_url + urllib.quote_plus(
+        ndt_url_ipv4 = self.prometheus_base_url + urllib.parse.quote_plus(
             prometheus_status.QUERIES['ndt'])
-        ndt_url_ipv6 = self.prometheus_base_url + urllib.quote_plus(
+        ndt_url_ipv6 = self.prometheus_base_url + urllib.parse.quote_plus(
             prometheus_status.QUERIES['ndt_ipv6'])
-        neubot_url_ipv4 = self.prometheus_base_url + urllib.quote_plus(
+        neubot_url_ipv4 = self.prometheus_base_url + urllib.parse.quote_plus(
             prometheus_status.QUERIES['neubot'])
-        neubot_url_ipv6 = self.prometheus_base_url + urllib.quote_plus(
+        neubot_url_ipv6 = self.prometheus_base_url + urllib.parse.quote_plus(
             prometheus_status.QUERIES['neubot_ipv6'])
         expected_slice_data = {
             'ndt': {
@@ -92,16 +92,16 @@ class StatusUpdateHandlerTest(unittest2.TestCase):
         self.mock_response.msg = 'mock message'
         self.mock_response.code = '200'
 
-    @mock.patch.object(urllib2.OpenerDirector, 'open', autospec=True)
+    @mock.patch.object(urllib.request.OpenerDirector, 'open', autospec=True)
     def test_get_slice_status_returns_none_with_invalid_json(self, mock_open):
         self.mock_response.read.return_value = '{lol, not valid json'
         mock_open.return_value = self.mock_response
         result = prometheus_status.get_slice_status(
             'https://prometheus.measurementlab.mock.net',
-            urllib2.OpenerDirector())
+            urllib.request.OpenerDirector())
         self.assertIsNone(result)
 
-    @mock.patch.object(urllib2.OpenerDirector, 'open', autospec=True)
+    @mock.patch.object(urllib.request.OpenerDirector, 'open', autospec=True)
     @mock.patch.object(prometheus_status, 'parse_sliver_tool_status')
     def test_get_slice_status_returns_populated_dictionary_when_it_gets_valid_statuses(
             self, mock_parse_sliver_tool_status, mock_open):
@@ -146,16 +146,16 @@ class StatusUpdateHandlerTest(unittest2.TestCase):
 
         actual_status = prometheus_status.get_slice_status(
             'https://prometheus.measurementlab.mock.net',
-            urllib2.OpenerDirector())
+            urllib.request.OpenerDirector())
         self.assertDictEqual(actual_status, expected_status)
 
-    @mock.patch.object(urllib2.OpenerDirector, 'open', autospec=True)
+    @mock.patch.object(urllib.request.OpenerDirector, 'open', autospec=True)
     def test_get_slice_status_returns_none_when_a_HTTPError_is_raised_by_urlopen(
             self, mock_open):
 
         # urllib2.HTTPError() requires 6 arguments. Subclassing to override
         # __init__ makes instantiating this easier.
-        class MockHttpError(urllib2.HTTPError):
+        class MockHttpError(urllib.error.HTTPError):
 
             def __init__(self, cause):
                 self.cause = cause
@@ -164,7 +164,7 @@ class StatusUpdateHandlerTest(unittest2.TestCase):
         mock_open.return_value = self.mock_response
         self.assertIsNone(prometheus_status.get_slice_status(
             'https://prometheus.measurementlab.mock.net',
-            urllib2.OpenerDirector()))
+            urllib.request.OpenerDirector()))
 
 
 if __name__ == '__main__':

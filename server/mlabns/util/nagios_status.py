@@ -1,6 +1,6 @@
 import logging
 import re
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from mlabns.util import constants
 from mlabns.util import message
@@ -63,12 +63,12 @@ def authenticate_nagios(nagios):
     Returns:
         A urllib2 OpenerDirector object.
     """
-    password_manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    password_manager = urllib.request.HTTPPasswordMgrWithDefaultRealm()
     password_manager.add_password(None, nagios.url, nagios.username,
                                   nagios.password)
 
-    authhandler = urllib2.HTTPDigestAuthHandler(password_manager)
-    opener = urllib2.build_opener(authhandler)
+    authhandler = urllib.request.HTTPDigestAuthHandler(password_manager)
+    opener = urllib.request.build_opener(authhandler)
     return opener
 
 
@@ -144,12 +144,12 @@ def get_slice_status(url, opener):
     status = {}
     try:
         lines = opener.open(url).read().strip('\n').split('\n')
-    except urllib2.HTTPError:
+    except urllib.error.HTTPError:
         # TODO(claudiu) Notify(email) when this happens.
         logging.error('Cannot open %s.', url)
         return None
 
-    lines = filter(lambda x: not x.isspace(), lines)
+    lines = [x for x in lines if not x.isspace()]
     if not lines:
         logging.info('Nagios gave empty response for sliver status at the' \
                      'following url: %s',url)

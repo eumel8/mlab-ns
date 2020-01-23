@@ -27,9 +27,7 @@ import pickle
 from django.db import models
 from oauth2client.client import Storage as BaseStorage
 
-class CredentialsField(models.Field):
-
-  __metaclass__ = models.SubfieldBase
+class CredentialsField(models.Field, metaclass=models.SubfieldBase):
 
   def get_internal_type(self):
     return "TextField"
@@ -45,9 +43,7 @@ class CredentialsField(models.Field):
     return base64.b64encode(pickle.dumps(value))
 
 
-class FlowField(models.Field):
-
-  __metaclass__ = models.SubfieldBase
+class FlowField(models.Field, metaclass=models.SubfieldBase):
 
   def get_internal_type(self):
     return "TextField"

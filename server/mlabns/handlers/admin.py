@@ -41,7 +41,7 @@ class AdminHandler(webapp.RequestHandler):
         }
 
         path = self.request.path.rstrip('/')
-        if path not in valid_paths.keys():
+        if path not in list(valid_paths.keys()):
             return util.send_not_found(self)
 
         return valid_paths[path]()

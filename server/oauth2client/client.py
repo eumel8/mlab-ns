@@ -20,7 +20,7 @@ Tools for interacting with OAuth 2.0 protected resources.
 __author__ = 'jcgregorio@google.com (Joe Gregorio)'
 
 import base64
-import clientsecrets
+from . import clientsecrets
 import copy
 import datetime
 import httplib2
@@ -28,10 +28,10 @@ import logging
 import os
 import sys
 import time
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 
-from anyjson import simplejson
+from .anyjson import simplejson
 
 HAS_OPENSSL = False
 try:
@@ -43,7 +43,7 @@ except ImportError:
   pass
 
 try:
-  from urlparse import parse_qsl
+  from urllib.parse import parse_qsl
 except ImportError:
   from cgi import parse_qsl
 
@@ -365,7 +365,7 @@ class OAuth2Credentials(Credentials):
 
   def _generate_refresh_request_body(self):
     """Generate the body that will be used in the refresh request."""
-    body = urllib.urlencode({
+    body = urllib.parse.urlencode({
         'grant_type': 'refresh_token',
         'client_id': self.client_id,
         'client_secret': self.client_secret,
@@ -607,7 +607,7 @@ class AssertionCredentials(OAuth2Credentials):
   def _generate_refresh_request_body(self):
     assertion = self._generate_assertion()
 
-    body = urllib.urlencode({
+    body = urllib.parse.urlencode({
         'assertion_type': self.assertion_type,
         'assertion': assertion,
         'grant_type': 'assertion',
@@ -690,7 +690,7 @@ if HAS_OPENSSL:
 
     def _generate_assertion(self):
       """Generate the assertion that will be used in the request."""
-      now = long(time.time())
+      now = int(time.time())
       payload = {
           'aud': self.token_uri,
           'scope': self.scope,
@@ -824,10 +824,10 @@ class OAuth2WebServerFlow(Flow):
         'scope': self.scope,
         }
     query.update(self.params)
-    parts = list(urlparse.urlparse(self.auth_uri))
+    parts = list(urllib.parse.urlparse(self.auth_uri))
     query.update(dict(parse_qsl(parts[4]))) # 4 is the index of the query part
-    parts[4] = urllib.urlencode(query)
-    return urlparse.urlunparse(parts)
+    parts[4] = urllib.parse.urlencode(query)
+    return urllib.parse.urlunparse(parts)
 
   def step2_exchange(self, code, http=None):
     """Exhanges a code for OAuth2Credentials.
@@ -839,10 +839,10 @@ class OAuth2WebServerFlow(Flow):
       http: httplib2.Http, optional http instance to use to do the fetch
     """
 
-    if not (isinstance(code, str) or isinstance(code, unicode)):
+    if not (isinstance(code, str) or isinstance(code, str)):
       code = code['code']
 
-    body = urllib.urlencode({
+    body = urllib.parse.urlencode({
         'grant_type': 'authorization_code',
         'client_id': self.client_id,
         'client_secret': self.client_secret,

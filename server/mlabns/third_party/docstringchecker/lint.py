@@ -17,7 +17,7 @@ Then pylint will import the register function and call it.  So we can have
 as many/few checkers as we want in this one module.
 """
 
-from __future__ import print_function
+
 
 import os
 import sys
@@ -251,7 +251,7 @@ class DocStringChecker(BaseChecker):
 
     # Make sure the sections are in the right order.
     valid_lineno = lambda x: x >= 0
-    lineno_sections = filter(valid_lineno, lineno_sections)
+    lineno_sections = list(filter(valid_lineno, lineno_sections))
     if lineno_sections != sorted(lineno_sections):
       self.add_message('C9008', node=node, line=node.fromlineno)
 

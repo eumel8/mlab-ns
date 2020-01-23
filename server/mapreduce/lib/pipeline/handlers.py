@@ -24,7 +24,7 @@ import logging
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util as webapp_util
 
-import pipeline
+from . import pipeline
 
 
 _APP = webapp.WSGIApplication(pipeline.create_handlers_map(), debug=True)

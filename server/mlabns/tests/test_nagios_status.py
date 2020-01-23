@@ -1,6 +1,6 @@
 import mock
 import unittest2
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 
 from mlabns.handlers import update
 from mlabns.util import message
@@ -123,7 +123,7 @@ class StatusUpdateHandlerTest(unittest2.TestCase):
     def setUp(self):
         self.status_update_handler = update.StatusUpdateHandler()
         self.mock_urlopen_response = mock.Mock()
-        self.opener = urllib2.OpenerDirector()
+        self.opener = urllib.request.OpenerDirector()
 
         urlopen_patch = mock.patch.object(
             nagios_status.urllib2.OpenerDirector,
@@ -272,7 +272,7 @@ unparseable status 2
     def test_get_slice_status_returns_none_when_a_HTTPError_is_raised_by_urlopen(
             self):
 
-        class MockHttpError(urllib2.HTTPError):
+        class MockHttpError(urllib.error.HTTPError):
 
             def __init__(self, cause):
                 self.cause = cause

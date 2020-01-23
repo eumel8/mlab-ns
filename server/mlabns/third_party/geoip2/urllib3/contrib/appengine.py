@@ -38,7 +38,7 @@ urllib3 on Google App Engine:
 :class:`PoolManager` without any configuration or special environment variables.
 """
 
-from __future__ import absolute_import
+
 import logging
 import os
 import warnings

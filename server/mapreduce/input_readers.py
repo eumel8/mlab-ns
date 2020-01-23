@@ -43,7 +43,7 @@ __all__ = [
 import base64
 import copy
 import logging
-import StringIO
+import io
 import time
 import zipfile
 
@@ -110,7 +110,7 @@ class InputReader(model.JsonMixin):
   def __iter__(self):
     return self
 
-  def next(self):
+  def __next__(self):
     """Returns the next input from this input reader as a key, value pair.
 
     Returns:
@@ -196,13 +196,13 @@ def _get_params(mapper_spec, allowed_keys=None):
     else:
       logging.warning(message)
     params = mapper_spec.params
-    params = dict((str(n), v) for n, v in params.iteritems())
+    params = dict((str(n), v) for n, v in params.items())
   else:
     if not isinstance(mapper_spec.params.get("input_reader"), dict):
       raise BadReaderParamsError(
           "Input reader parameters should be a dictionary")
     params = mapper_spec.params.get("input_reader")
-    params = dict((str(n), v) for n, v in params.iteritems())
+    params = dict((str(n), v) for n, v in params.items())
     if allowed_keys:
       params_diff = set(params.keys()) - allowed_keys
       if params_diff:
@@ -510,11 +510,11 @@ class AbstractDatastoreInputReader(InputReader):
         batch_size = int(params[cls.BATCH_SIZE_PARAM])
         if batch_size < 1:
           raise BadReaderParamsError("Bad batch size: %s" % batch_size)
-      except ValueError, e:
+      except ValueError as e:
         raise BadReaderParamsError("Bad batch size: %s" % e)
     if cls.NAMESPACE_PARAM in params:
       if not isinstance(params[cls.NAMESPACE_PARAM],
-                        (str, unicode, type(None))):
+                        (str, type(None))):
         raise BadReaderParamsError(
             "Expected a single namespace string")
     if cls.NAMESPACES_PARAM in params:
@@ -723,7 +723,7 @@ class DatastoreInputReader(AbstractDatastoreInputReader):
     # Fail fast if Model cannot be located.
     try:
       util.for_name(entity_kind_name)
-    except ImportError, e:
+    except ImportError as e:
       raise BadReaderParamsError("Bad entity kind: %s" % e)
 
   @classmethod
@@ -801,7 +801,7 @@ class BlobstoreLineInputReader(InputReader):
     self._has_iterated = False
     self._read_before_start = bool(start_position)
 
-  def next(self):
+  def __next__(self):
     """Returns the next input from as an (offset, line) tuple."""
     self._has_iterated = True
 
@@ -857,7 +857,7 @@ class BlobstoreLineInputReader(InputReader):
     if cls.BLOB_KEYS_PARAM not in params:
       raise BadReaderParamsError("Must specify 'blob_keys' for mapper input")
     blob_keys = params[cls.BLOB_KEYS_PARAM]
-    if isinstance(blob_keys, basestring):
+    if isinstance(blob_keys, str):
       # This is a mechanism to allow multiple blob keys (which do not contain
       # commas) in a single string. It may go away.
       blob_keys = blob_keys.split(",")
@@ -884,7 +884,7 @@ class BlobstoreLineInputReader(InputReader):
     """
     params = _get_params(mapper_spec)
     blob_keys = params[cls.BLOB_KEYS_PARAM]
-    if isinstance(blob_keys, basestring):
+    if isinstance(blob_keys, str):
       # This is a mechanism to allow multiple blob keys (which do not contain
       # commas) in a single string. It may go away.
       blob_keys = blob_keys.split(",")
@@ -900,9 +900,9 @@ class BlobstoreLineInputReader(InputReader):
       shards_per_blob = 1
 
     chunks = []
-    for blob_key, blob_size in blob_sizes.items():
+    for blob_key, blob_size in list(blob_sizes.items()):
       blob_chunk_size = blob_size // shards_per_blob
-      for i in xrange(shards_per_blob - 1):
+      for i in range(shards_per_blob - 1):
         chunks.append(BlobstoreLineInputReader.from_json(
             {cls.BLOB_KEY_PARAM: blob_key,
              cls.INITIAL_POSITION_PARAM: blob_chunk_size * i,
@@ -950,7 +950,7 @@ class BlobstoreZipInputReader(InputReader):
     self._zip = None
     self._entries = None
 
-  def next(self):
+  def __next__(self):
     """Returns the next input from this input reader as (ZipInfo, opener) tuple.
 
     Returns:
@@ -1148,7 +1148,7 @@ class BlobstoreZipLineInputReader(InputReader):
       raise BadReaderParamsError("Must specify 'blob_keys' for mapper input")
 
     blob_keys = params[cls.BLOB_KEYS_PARAM]
-    if isinstance(blob_keys, basestring):
+    if isinstance(blob_keys, str):
       # This is a mechanism to allow multiple blob keys (which do not contain
       # commas) in a single string. It may go away.
       blob_keys = blob_keys.split(",")
@@ -1179,7 +1179,7 @@ class BlobstoreZipLineInputReader(InputReader):
     """
     params = _get_params(mapper_spec)
     blob_keys = params[cls.BLOB_KEYS_PARAM]
-    if isinstance(blob_keys, basestring):
+    if isinstance(blob_keys, str):
       # This is a mechanism to allow multiple blob keys (which do not contain
       # commas) in a single string. It may go away.
       blob_keys = blob_keys.split(",")
@@ -1219,7 +1219,7 @@ class BlobstoreZipLineInputReader(InputReader):
 
     return readers
 
-  def next(self):
+  def __next__(self):
     """Returns the next line from this input reader as (lineinfo, line) tuple.
 
     Returns:
@@ -1239,7 +1239,7 @@ class BlobstoreZipLineInputReader(InputReader):
         raise StopIteration()
       entry = self._entries.pop()
       value = self._zip.read(entry.filename)
-      self._filestream = StringIO.StringIO(value)
+      self._filestream = io.StringIO(value)
       if self._initial_offset:
         self._filestream.seek(self._initial_offset)
         self._filestream.readline()
@@ -1253,7 +1253,7 @@ class BlobstoreZipLineInputReader(InputReader):
       self._filestream = None
       self._start_file_index += 1
       self._initial_offset = 0
-      return self.next()
+      return next(self)
 
     return ((self._blob_key, self._start_file_index, start_position),
             line.rstrip("\n"))
@@ -1323,7 +1323,7 @@ class ConsistentKeyReader(DatastoreKeyInputReader):
   START_TIME_US_PARAM = "start_time_us"
   UNAPPLIED_LOG_FILTER = "__unapplied_log_timestamp_us__ <"
   DUMMY_KIND = "DUMMY_KIND"
-  DUMMY_ID = 106275677020293L
+  DUMMY_ID = 106275677020293
   UNAPPLIED_QUERY_DEADLINE = 270  # Max supported by datastore.
 
   def _get_unapplied_jobs_accross_namespaces(self,
@@ -1465,7 +1465,7 @@ class ConsistentKeyReader(DatastoreKeyInputReader):
     """Splits input into key ranges."""
     readers = super(ConsistentKeyReader, cls).split_input(mapper_spec)
     start_time_us = _get_params(mapper_spec).get(
-        cls.START_TIME_US_PARAM, long(time.time() * 1e6))
+        cls.START_TIME_US_PARAM, int(time.time() * 1e6))
     for reader in readers:
       reader.start_time_us = start_time_us
     return readers
@@ -1558,7 +1558,7 @@ class NamespaceInputReader(InputReader):
         batch_size = int(params[cls.BATCH_SIZE_PARAM])
         if batch_size < 1:
           raise BadReaderParamsError("Bad batch size: %s" % batch_size)
-      except ValueError, e:
+      except ValueError as e:
         raise BadReaderParamsError("Bad batch size: %s" % e)
 
   @classmethod
@@ -1686,12 +1686,12 @@ class RecordsReader(InputReader):
 
     if cls.FILES_PARAM in params:
       filenames = params[cls.FILES_PARAM]
-      if isinstance(filenames, basestring):
+      if isinstance(filenames, str):
         filenames = filenames.split(",")
     else:
       filenames = [params[cls.FILE_PARAM]]
 
-    batch_list = [[] for _ in xrange(shard_count)]
+    batch_list = [[] for _ in range(shard_count)]
     for index, filename in enumerate(filenames):
       # Simplest round robin so we don't have any short shards.
       batch_list[index % shard_count].append(filenames[index])
@@ -1821,7 +1821,7 @@ class LogInputReader(InputReader):
       An instance of the InputReader configured using the given JSON parameters.
     """
     # Strip out unrecognized parameters, as introduced by b/5960884.
-    params = dict((str(k), v) for k, v in json.iteritems()
+    params = dict((str(k), v) for k, v in json.items()
                   if k in cls._PARAMS)
 
     # This is not symmetric with to_json() wrt. PROTOTYPE_REQUEST_PARAM because
@@ -1866,7 +1866,7 @@ class LogInputReader(InputReader):
 
     # Create a LogInputReader for each shard, modulating the params as we go.
     shards = []
-    for _ in xrange(shard_count - 1):
+    for _ in range(shard_count - 1):
       params[cls.END_TIME_PARAM] = (params[cls.START_TIME_PARAM] +
                                     seconds_per_shard)
       shards.append(LogInputReader(**params))
@@ -1919,14 +1919,14 @@ class LogInputReader(InputReader):
     # doesn't trigger any requests for actual log records.
     try:
       logservice.fetch(**params)
-    except logservice.InvalidArgumentError, e:
+    except logservice.InvalidArgumentError as e:
       raise errors.BadReaderParamsError("One or more parameters are not valid "
                                         "inputs to logservice.fetch(): %s" % e)
 
   def __str__(self):
     """Returns the string representation of this LogInputReader."""
     params = []
-    for key, value in self.__params.iteritems():
+    for key, value in self.__params.items():
       if key is self._PROTOTYPE_REQUEST_PARAM:
         params.append("%s='%s'" % (key, value))
       elif key is self._OFFSET_PARAM:

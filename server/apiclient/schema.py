@@ -244,7 +244,7 @@ class _SchemaToStruct(object):
     if stype == 'object':
       self.emitEnd('{', schema.get('description', ''))
       self.indent()
-      for pname, pschema in schema.get('properties', {}).iteritems():
+      for pname, pschema in schema.get('properties', {}).items():
         self.emitBegin('"%s": ' % pname)
         self._to_str_impl(pschema)
       self.undent()

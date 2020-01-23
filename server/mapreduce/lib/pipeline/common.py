@@ -24,7 +24,7 @@ from google.appengine.api import mail
 from google.appengine.api import taskqueue
 from google.appengine.ext import webapp
 
-import pipeline
+from . import pipeline
 
 
 class Return(pipeline.Pipeline):
@@ -323,7 +323,7 @@ class Log(pipeline.Pipeline):
     return Log(logging.CRITICAL, *args, **kwargs)
 
   def run(self, level, message, *args):
-    Log._log_method.im_func(level, message, *args)
+    Log._log_method.__func__(level, message, *args)
 
 
 class Delay(pipeline.Pipeline):
@@ -340,7 +340,7 @@ class Delay(pipeline.Pipeline):
   async = True
 
   def __init__(self, *args, **kwargs):
-    if len(args) != 0 or len(kwargs) != 1 or kwargs.keys()[0] != 'seconds':
+    if len(args) != 0 or len(kwargs) != 1 or list(kwargs.keys())[0] != 'seconds':
       raise TypeError('Delay takes one keyword parameter, "seconds".')
     pipeline.Pipeline.__init__(self, *args, **kwargs)
 
@@ -417,7 +417,7 @@ class EmailToContinue(pipeline.Pipeline):
         'approve_url': cgi.escape(approve_url),
         'disapprove_url': cgi.escape(disapprove_url),
       }
-    EmailToContinue._email_message.im_func(**mail_args).send()
+    EmailToContinue._email_message.__func__(**mail_args).send()
 
   def run_test(self, **kwargs):
     self.run(**kwargs)

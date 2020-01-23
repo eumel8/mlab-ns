@@ -607,7 +607,7 @@ class MapreduceState(db.Model):
       # Only 16 labels on the whole chart.
       stride_length = max(1, shard_count / 16)
       chart.bottom.labels = []
-      for x in xrange(shard_count):
+      for x in range(shard_count):
         if (x % stride_length == 0 or
             x == shard_count - 1):
           chart.bottom.labels.append(x)
@@ -749,7 +749,7 @@ class ShardState(db.Model):
 
   def copy_from(self, other_state):
     """Copy data from another shard state entity to self."""
-    for prop in self.properties().values():
+    for prop in list(self.properties().values()):
       setattr(self, prop.name, getattr(other_state, prop.name))
 
   def get_shard_number(self):
